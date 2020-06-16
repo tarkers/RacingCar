@@ -42,7 +42,7 @@ class MLPlay:
                 if self.lane==-1 or (self.car_pos[0]-35)%70==0:
                    self.prepose= self.lane=(self.car_pos[0]-35)//70 
 
-            elif -40<self.car_pos[1]-car["pos"][1]<280+self.car_vel*1.5:  
+            elif -40<self.car_pos[1]-car["pos"][1]<230+self.car_vel*1.5:  
                 Distance=self.car_pos[1]-car["pos"][1] 
                 if car["id"]<5 and -15<car["pos"][0]-self.car_pos[0]<15:                    
                     lane_car[self.prepose]=Distance
@@ -88,7 +88,7 @@ class MLPlay:
         if scene_info["status"] != "ALIVE":
             return "RESET"
 
-        if self.maintain>-1 and lane_car[self.prepose]<400:
+        if lane_car[self.prepose]<400:
             if self.car_pos[0]>self.lane_center[self.lane] :  
                # print(self.car_pos[0],self.lane_center[self.lane])
                 self.test="left"        
