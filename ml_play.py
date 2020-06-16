@@ -92,10 +92,10 @@ class MLPlay:
             if self.car_pos[0]>self.lane_center[self.lane] :  
                # print(self.car_pos[0],self.lane_center[self.lane])
                 self.test="left"        
-                return ["MOVE_LEFT"]
+                return ["SPEED", "MOVE_LEFT"]
             elif self.car_pos[0]<self.lane_center[self.lane]:
                 self.test="right" 
-                return ["MOVE_RIGHT"]  
+                return ["SPEED", "MOVE_RIGHT"]   
             else: 
                 self.test="SPEED"          
                 return ["SPEED"]          
