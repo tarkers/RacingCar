@@ -54,8 +54,8 @@ class MLPlay:
                 if -10<self.car_pos[0]-(self.prepose*70+35)<10:
                     if front_car_speed>=car["velocity"]:
                         front_car_speed=car["velocity"]      
-        #print(lane_car,self.lane,self.prepose,self.car_pos[0], front_car_speed ,self.car_vel,self.test)
-        if 0<lane_car[self.prepose]<120+self.car_vel and front_car_speed<=self.car_vel:
+        print(lane_car,self.lane,self.prepose,self.car_pos[0], front_car_speed ,self.car_vel,self.test)
+        if 30<lane_car[self.prepose]<120+self.car_vel and front_car_speed<=self.car_vel :
             self.test="BRAKE"  
             return ["BRAKE"]
         #right side most
