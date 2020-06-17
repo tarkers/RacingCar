@@ -15,6 +15,7 @@ class MLPlay:
         self.lane=-1
         self.mode=0
         self.prepose=0
+        self.test="none"
         self.dangerous=False
         self.tt=2
         self.lane_center = [35, 105, 175, 245, 315, 385, 455, 525, 595] #lane to move
@@ -41,9 +42,9 @@ class MLPlay:
                     self.lane=(self.car_pos[0]-35)//70 
                 elif (self.car_pos[0]-35)%70==0:
                     self.prepose=(self.car_pos[0]-35)//70 
-            elif -55<self.car_pos[1]-car["pos"][1]<360+self.car_vel*1.5 +(self.car_pos[1]-380)//2: 
+            elif -55<self.car_pos[1]-car["pos"][1]<360+self.car_vel*1.5 +(self.car_pos[1]-380)//3 : 
                 Distance=self.car_pos[1]-car["pos"][1] 
-                if car["id"]<5 and -20<car["pos"][0]-self.car_pos[0]<20 and -40<Distance<80:                    
+                if  abs(car["pos"][0]-self.car_pos[0])<28 and Distance<60:                    
                     lane_car[self.prepose]=Distance
                     self.dangerous=True
                     if car["pos"][0]-self.car_pos[0]>0:
@@ -57,12 +58,14 @@ class MLPlay:
                 if -25<self.car_pos[0]-car["pos"][0]<25 and  car["id"]>5:
                     if front_car_speed>=car["velocity"]:
                         front_car_speed=car["velocity"]     
-        #print(lane_car,"lane",self.lane,"prepose",self.prepose,self.car_pos, front_car_speed ,self.car_vel,,self.dangerous)
+        #print(lane_car,"lane",self.lane,"prepose",self.prepose,self.car_pos, front_car_speed ,self.car_vel,self.test,self.dangerous)
         
         if self.tt!=2:
             self.tt+=1
             return["BRAKE"]
-        if self.dangerous:
+
+        elif self.dangerous:
+            self.test="danger" 
             self.dangerous=False 
             if task==-1 and self.prepose!=0 :
                  if lane_car[self.prepose-1]>300:
@@ -81,6 +84,7 @@ class MLPlay:
                     self.lane=self.lane-1
             elif self.lane<=2 and lane_car[self.lane+1]==999:
                 self.lane=self.lane+1
+        
         # right side most
         elif self.prepose==8 :
             if lane_car[7]>=250 :
@@ -101,13 +105,13 @@ class MLPlay:
 
         else:
             if lane_car[self.prepose+1]>lane_car[self.prepose]>0:
-                if self.lane==7 and lane_car[6]>450:
+                if self.lane==7 and lane_car[6]>450 or lane_car[6]<-45:
                     self.lane=self.prepose-1                   
                 else:
                     self.lane=self.prepose+1
 
             if lane_car[self.prepose-1]>=lane_car[self.prepose]>0:
-                if self.prepose==1 and lane_car[2]>450 or lane_car[self.prepose-1]<lane_car[self.prepose+1]:
+                if self.prepose==1 and lane_car[2]>450 or lane_car[2]<-45 or lane_car[self.prepose-1]<lane_car[self.prepose+1]:
                     self.lane=self.prepose+1 
                 else:
                     self.lane=self.prepose-1
@@ -121,25 +125,30 @@ class MLPlay:
 
 
         # retrun value        
-        if self.car_pos[0]>self.lane_center[self.lane] :   
+        if self.car_pos[0]>self.lane_center[self.lane] :  
+            self.test="left"    
             if 10<lane_car[self.prepose]<135+self.car_vel*2-front_car_speed and front_car_speed<=self.car_vel :    
                 return ["BRAKE", "MOVE_LEFT"]
-            elif 10<lane_car[self.prepose]<100 and front_car_speed<=self.car_vel:
+            elif 10<lane_car[self.prepose]<130 and front_car_speed<=self.car_vel:
                 return ["BRAKE"]
             else:
                 return ["SPEED", "MOVE_LEFT"]
         elif self.car_pos[0]<self.lane_center[self.lane]:
+            self.test="right" 
             if 10<lane_car[self.prepose]<135+self.car_vel*2-front_car_speed and front_car_speed<=self.car_vel:    
                 return ["BRAKE", "MOVE_RIGHT"]
-            elif 10<lane_car[self.prepose]<100 and front_car_speed<=self.car_vel:
+            elif 10<lane_car[self.prepose]<130 and front_car_speed<=self.car_vel:
                 return ["BRAKE"]
             else:
                 return ["SPEED", "MOVE_RIGHT"]
         else: 
-            if 10<lane_car[self.prepose]<130+self.car_vel*2-front_car_speed  and front_car_speed<=self.car_vel:
+            if 10<lane_car[self.prepose]<125+self.car_vel*2-front_car_speed  and front_car_speed<=self.car_vel:
+                self.test="BRAKE++++++"  
                 return ["BRAKE"]
-            else:        
-                return ["SPEED"]               
+            else:
+                self.test="SPEED"          
+                return ["SPEED"]          
+        self.test="SPEED---"       
         return ["SPEED"] 
 
 
