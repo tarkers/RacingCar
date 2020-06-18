@@ -156,7 +156,7 @@ class MLPlay:
             else:
                 return ["SPEED", "MOVE_RIGHT"]
         else: 
-            if 10<lane_car[self.prepose]<125+self.car_vel*2-front_car_speed  and front_car_speed<self.car_vel: 
+            if 10<lane_car[self.prepose]<133+self.car_vel*2-front_car_speed  and front_car_speed<self.car_vel: 
                 return ["BRAKE"]
             else:
                 self.test="SPEED"
