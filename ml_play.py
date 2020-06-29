@@ -64,7 +64,7 @@ class MLPlay:
                 
                 for w in self.lane_center:
                     pos+=1
-                    if -20<=(car["pos"][0]-w)<=20:
+                    if -30<=(car["pos"][0]-w)<=30:
                        break
                 
                 if lane_car[pos]>Distance :
