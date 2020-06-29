@@ -19,6 +19,7 @@ class MLPlay:
         self.dangerous=False
         self.tt=2
         self.lane_center = [35, 105, 175, 245, 315, 385, 455, 525, 595] #lane to move
+        
         pass
 
     def update(self, scene_info):
@@ -29,6 +30,7 @@ class MLPlay:
         if scene_info["status"] != "ALIVE":
             return "RESET"
         lane_car=[999,999,999,999,999,999,999,999,999]
+        coin_numbers=[0,0,0,0,0,0,0,0,0]
         player_place=[0,0,0,0,0,0,0,0,0]
         self.car_pos = scene_info[self.player]
         task=0
@@ -39,8 +41,9 @@ class MLPlay:
         for car in scene_info["cars_info"]:
             if car["id"]==self.player_no:
                 self.car_vel = car["velocity"]
-                if self.lane==-1 :
+                if self.lane==-1 :                
                     self.lane=(self.car_pos[0]-35)//70 
+                    self.prepose=self.lane
                 elif (self.car_pos[0]-35)%70==0:
                     self.prepose=(self.car_pos[0]-35)//70 
             elif -55<self.car_pos[1]-car["pos"][1]<360+self.car_vel*1.5 +(self.car_pos[1]-380)//3 : 
@@ -55,19 +58,32 @@ class MLPlay:
                         if car["pos"][0]-self.car_pos[0]>0:
                             task=-1
                         else:
-                            task=1      
-                if lane_car[(car["pos"][0]-35)//70]>Distance :
+                            task=1    
+                tmp_car=0 
+                pos=-1 
+                
+                for w in self.lane_center:
+                    pos+=1
+                    if -20<=(car["pos"][0]-w)<=20:
+                       break
+                
+                if lane_car[pos]>Distance :
                     if car["id"]<5 and (car["pos"][0]-35)%70==0:
                         player_place[(car["pos"][0]-35)//70]=1
                     else:
-                        lane_car[(car["pos"][0]-35)//70]=Distance
+                        lane_car[pos]=Distance
                     
                 #same lane
                 if -25<self.car_pos[0]-car["pos"][0]<25 and  car["id"]>5:
                     if front_car_speed>=car["velocity"]:
                         front_car_speed=car["velocity"]     
-        #print(lane_car,"lane",self.lane,"prepose",self.prepose,self.car_pos, front_car_speed ,self.car_vel,self.test,self.dangerous)
-        
+        # print(lane_car,"lane",self.lane,"prepose",self.prepose,self.car_pos, front_car_speed ,self.car_vel,self.test,self.dangerous)
+        have_coin=False
+        for coin in scene_info["coins"]:
+            if 0<=self.car_pos[1]-coin[1]<=400:
+                coin_numbers[(coin[0]-25)//70]+=1
+                have_coin=True
+            
         if self.tt!=2:
             self.tt+=1
             self.test="BRAKE"
@@ -88,15 +104,23 @@ class MLPlay:
                     return ["BRAKE","MOVE_LEFT"]
                 else:
                     return ["BRAKE","MOVE_RIGHT"]
-        
-        
-
+        coin_side=False
+        for i in range(8):
+            if coin_numbers[i]>0:
+                if i>self.prepose:
+                    coin_side=True
+                else:
+                    coin_side=False
+                break
+        # print(coin_side)
         # CHANGE LANE 999
-        elif lane_car[self.lane]==999:              
-            if self.lane>=6 and lane_car[self.lane-1]==999:
+        if lane_car[self.lane]>=200 and have_coin==True:          
+            if self.lane>=1 and lane_car[self.lane-1]>=200 and not coin_side:
+                if coin_numbers[self.lane]==0:
                     self.lane=self.lane-1
-            elif self.lane<=2 and lane_car[self.lane+1]==999:
-                self.lane=self.lane+1
+            elif self.lane<=7 and lane_car[self.lane+1]>=200 and coin_side:
+                if coin_numbers[self.lane]==0:
+                    self.lane=self.lane+1
         
         # right side most
         elif self.prepose==8 :
@@ -117,7 +141,7 @@ class MLPlay:
                 return["BRAKE"]
 
         # change lane
-        else:
+        else :
             if lane_car[self.prepose+1]>lane_car[self.prepose]>0:
                 if self.lane==7 and lane_car[6]>450 or lane_car[6]<-45:
                     self.lane=self.prepose-1                   
@@ -139,7 +163,8 @@ class MLPlay:
 
 
         # retrun value        
-        if self.car_pos[0]>self.lane_center[self.lane]:  
+        if self.car_pos[0]>self.lane_center[self.lane] :  
+            # print(self.lane)
             self.test="left"   
             if 10<lane_car[self.prepose]<135+self.car_vel*2-front_car_speed and front_car_speed<self.car_vel :    
                 return ["BRAKE", "MOVE_LEFT"]
