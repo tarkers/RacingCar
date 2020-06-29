@@ -49,7 +49,7 @@ class MLPlay:
             elif -55<self.car_pos[1]-car["pos"][1]<360+self.car_vel*1.5 +(self.car_pos[1]-380)//3 : 
                 Distance=self.car_pos[1]-car["pos"][1] 
                 if car["id"]<5 :
-                    if  abs(car["pos"][0]-self.car_pos[0])<50 and -20<Distance<70+self.car_vel-car["velocity"]:
+                    if  -50<(car["pos"][0]-self.car_pos[0])<50 and -20<Distance<70+self.car_vel-car["velocity"]:
                         if self.car_pos[0]>car["pos"][0]:
                             lane_car[self.prepose-1]=Distance
                         else:
